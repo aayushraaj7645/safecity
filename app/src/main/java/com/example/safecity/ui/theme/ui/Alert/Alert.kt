@@ -152,8 +152,9 @@ var selectedIndex by remember { mutableIntStateOf(-1) }
                                     checked = selectedIndex == message.id,
                                     onCheckedChange = {
                                         selectedIndex = message.id
-                                        homeScreenViewModel.getMessageById(message.id)
                                         checkedId(message.id)
+                                        homeScreenViewModel.saveCustomMessage(message.id,true)
+
                                     }
                                 )
 

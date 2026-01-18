@@ -18,10 +18,12 @@ class HomeScreenViewModel(private val emergencyContactDao: EmergencyContactDao,p
 
     val selectedIdOfMessage = mutableIntStateOf(-1)
 
+
          val contacts = mutableStateListOf<ContactEntity>()
 
         val messages = mutableStateListOf<MessageEntity>()
-    val selectedMessageEntity= mutableStateOf<String>( "i am in trouble, i need help")
+
+    var selectedMessageEntity= mutableStateOf<String>( "i am in trouble, i need help")
 
         var alertMessage =mutableStateOf("help")
        val sentAlert = mutableStateOf<Boolean>(false)
@@ -29,7 +31,9 @@ class HomeScreenViewModel(private val emergencyContactDao: EmergencyContactDao,p
         init {
             getContacts()
             getEmergencyAlertMessage()
+
         }
+
 
     fun deleteContact(id: Int){
         viewModelScope.launch {
@@ -62,6 +66,18 @@ class HomeScreenViewModel(private val emergencyContactDao: EmergencyContactDao,p
         viewModelScope.launch {
             selectedMessageEntity.value = messageDao.getMessageById(id)
         }
+    }
+    fun saveCustomMessage(id:Int,isSelected:Boolean){
+        viewModelScope.launch {
+            messageDao.updateSelectedMessage(id,isSelected)
+        }
+        for(selectedMessage in messages){
+                if(selectedMessage.selectedMessage){
+                    selectedMessageEntity.value = selectedMessage.message
+                }else{
+                    selectedMessageEntity.value = alertMessage.value
+                }
+            }
         getEmergencyAlertMessage()
     }
 

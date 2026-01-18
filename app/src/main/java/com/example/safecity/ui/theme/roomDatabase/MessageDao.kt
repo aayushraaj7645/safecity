@@ -20,7 +20,12 @@ interface MessageDao {
     @Query("DELETE FROM messages WHERE id = :id")
     suspend fun deleteMessage(id: Int)
 
+    @Query("SELECT selectedMessage FROM messages WHERE id = :id")
+    suspend fun getSelectedMessageById(id: Int): Boolean
 
+
+    @Query("""UPDATE messages SET selectedMessage = :isSelected WHERE id = :id """)
+    suspend fun updateSelectedMessage(id: Int, isSelected: Boolean)
 
 
 }

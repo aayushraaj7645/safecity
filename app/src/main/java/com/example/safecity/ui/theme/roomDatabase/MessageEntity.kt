@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class MessageEntity (
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val selectedMessage:Boolean =false,
     val message: String,
 )
