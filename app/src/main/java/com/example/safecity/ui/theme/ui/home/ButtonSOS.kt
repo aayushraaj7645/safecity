@@ -2,6 +2,7 @@ package com.example.safecity.ui.theme.ui.home
 
 import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -26,14 +27,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.location.LocationManagerCompat.getCurrentLocation
 import com.example.safecity.ui.theme.ui.utility.hasSmsPermission
 import com.example.safecity.ui.theme.ui.utility.sendEmergencySms
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.delay
 
 
 @Composable
 fun ButtonSOS(title :String, safe : Boolean, onToggle : ()->Unit,homeScreenViewmodel: HomeScreenViewModel) {
-    val selectedIndex = homeScreenViewmodel.selectedMessageEntity
     val context = LocalContext.current
     val emergencyContacts = homeScreenViewmodel.contacts.map { it.phoneNumber }
     val sentAlert = homeScreenViewmodel.sentAlert
@@ -65,7 +68,7 @@ fun ButtonSOS(title :String, safe : Boolean, onToggle : ()->Unit,homeScreenViewm
 
     Button(onClick = {
             onToggle()
-            SendMessage(context, permissionLauncher, emergencyContacts,homeScreenViewmodel)
+            SendMessage(context, permissionLauncher, emergencyContacts, homeScreenViewmodel)
             triggerValue = true
         sentAlert.value = true
         }
@@ -91,14 +94,41 @@ fun ButtonSOS(title :String, safe : Boolean, onToggle : ()->Unit,homeScreenViewm
     }
 }
 
-fun SendMessage(context: Context,permissionLauncher: ActivityResultLauncher<String>,emergencyContacts: List<String>,homeScreenViewmodel: HomeScreenViewModel){
+fun SendMessage(context: Context,
+                permissionLauncher: ActivityResultLauncher<String>,
+                emergencyContacts: List<String>,
+                homeScreenViewmodel: HomeScreenViewModel) {
+
     val selectedIndex = homeScreenViewmodel.selectedMessageEntity.value
 
-    if(hasSmsPermission(context)){
-        sendEmergencySms(contacts = emergencyContacts, message = selectedIndex )
-    }
-    else{
-        permissionLauncher.launch(Manifest.permission.SEND_SMS)
+    getCurrentLocation(context) { locationLink ->
+
+        val finalMessage = "$selectedIndex\nMy location: $locationLink"
+        if (hasSmsPermission(context)) {
+            sendEmergencySms(contacts = emergencyContacts, message = finalMessage)
+        } else {
+            permissionLauncher.launch(Manifest.permission.SEND_SMS)
+        }
     }
 }
+
+
+fun getCurrentLocation(context: Context, onLocationReady: (String) -> Unit) {
+    val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+
+    if (
+        ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+        != PackageManager.PERMISSION_GRANTED
+    ) return
+
+    fusedClient.lastLocation.addOnSuccessListener { location ->
+        if (location != null) {
+            val lat = location.latitude
+            val lon = location.longitude
+            val mapLink = "https://maps.google.com/?q=$lat,$lon"
+            onLocationReady(mapLink)
+        }
+    }
+}
+
 

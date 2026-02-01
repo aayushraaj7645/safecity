@@ -17,13 +17,11 @@ import kotlinx.coroutines.launch
 class HomeScreenViewModel(private val emergencyContactDao: EmergencyContactDao,private val messageDao: MessageDao): ViewModel() {
 
     val selectedIdOfMessage = mutableIntStateOf(-1)
-
-
          val contacts = mutableStateListOf<ContactEntity>()
 
         val messages = mutableStateListOf<MessageEntity>()
 
-    var selectedMessageEntity= mutableStateOf<String>( "i am in trouble, i need help")
+    var selectedMessageEntity= mutableStateOf<String>("I am in trouble,I need help")
 
         var alertMessage =mutableStateOf("help")
        val sentAlert = mutableStateOf<Boolean>(false)
@@ -31,6 +29,7 @@ class HomeScreenViewModel(private val emergencyContactDao: EmergencyContactDao,p
         init {
             getContacts()
             getEmergencyAlertMessage()
+            getSelectedMessageOrDefault()
 
         }
 
@@ -42,7 +41,7 @@ class HomeScreenViewModel(private val emergencyContactDao: EmergencyContactDao,p
         getContacts()
     }
 
-        fun updateAlertMessage(message: String){
+        fun insertAlertMessage(message: String){
          viewModelScope.launch {
            messageDao.insertAlertMessage(MessageEntity(message = message))
          }
@@ -58,28 +57,27 @@ class HomeScreenViewModel(private val emergencyContactDao: EmergencyContactDao,p
         fun deleteAlertMessageById(id: Int) {
             viewModelScope.launch {
                 messageDao.deleteMessage(id)
+                getSelectedMessageOrDefault()
             }
             getEmergencyAlertMessage()
         }
+    fun saveCustomMessage(id: Int) {
+        viewModelScope.launch {
+            messageDao.unSelectAll()
+            messageDao.selectMessage(id)
+            getEmergencyAlertMessage()
+            getSelectedMessageOrDefault()
+        }
+    }
 
-    fun getMessageById(id: Int){
+    fun getSelectedMessageOrDefault() {
         viewModelScope.launch {
-            selectedMessageEntity.value = messageDao.getMessageById(id)
+            val selected = messageDao.getSelectedMessage()
+            selectedMessageEntity.value =
+                selected ?: "i am in trouble, i need help"
         }
     }
-    fun saveCustomMessage(id:Int,isSelected:Boolean){
-        viewModelScope.launch {
-            messageDao.updateSelectedMessage(id,isSelected)
-        }
-        for(selectedMessage in messages){
-                if(selectedMessage.selectedMessage){
-                    selectedMessageEntity.value = selectedMessage.message
-                }else{
-                    selectedMessageEntity.value = alertMessage.value
-                }
-            }
-        getEmergencyAlertMessage()
-    }
+
 
 
 

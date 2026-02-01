@@ -14,6 +14,13 @@ interface MessageDao {
     @Query("SELECT * FROM messages")
     suspend fun getAllMessages(): List<MessageEntity>
 
+    @Query("UPDATE messages SET selectedMessage = 0")
+    suspend fun unSelectAll()
+    @Query("UPDATE messages SET selectedMessage = 1 WHERE id = :id")
+    suspend fun selectMessage(id: Int)
+    @Query("SELECT message FROM messages WHERE selectedMessage = 1 LIMIT 1")
+    suspend fun getSelectedMessage(): String?
+
     @Query("SELECT message FROM messages WHERE id = :id")
     suspend fun getMessageById(id: Int): String
 
@@ -23,8 +30,7 @@ interface MessageDao {
     @Query("SELECT selectedMessage FROM messages WHERE id = :id")
     suspend fun getSelectedMessageById(id: Int): Boolean
 
-
-    @Query("""UPDATE messages SET selectedMessage = :isSelected WHERE id = :id """)
+    @Query("UPDATE messages SET selectedMessage = :isSelected WHERE id = :id ")
     suspend fun updateSelectedMessage(id: Int, isSelected: Boolean)
 
 

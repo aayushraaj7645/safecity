@@ -60,7 +60,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
         // Compose BOM
-        implementation(platform("androidx.compose:compose-bom:2024.04.01")) // or newer
+       implementation(platform("androidx.compose:compose-bom:2024.04.01")) // or newer
 
         // Core Compose
         implementation("androidx.compose.ui:ui")
@@ -83,6 +83,12 @@ dependencies {
         implementation("androidx.room:room-ktx:2.6.1")
 
 
+
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    implementation("com.google.maps.android:maps-compose:2.11.4")
+    implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
 
 }
 

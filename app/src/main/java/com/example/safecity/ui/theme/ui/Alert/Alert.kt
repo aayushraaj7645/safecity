@@ -48,9 +48,7 @@ var selectedIndex by remember { mutableIntStateOf(-1) }
     var showForm by remember { mutableStateOf(false) }
     var selectedAlertMsg by remember { mutableStateOf(false) }
 
-    fun checkedId(id: Int){
-        selectedIndex = id
-    }
+
 
     val messageList = homeScreenViewModel.messages
 
@@ -120,7 +118,7 @@ var selectedIndex by remember { mutableIntStateOf(-1) }
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = {
                                     if (msg.isNotBlank()) {
-                                        homeScreenViewModel.updateAlertMessage(msg)
+                                        homeScreenViewModel.insertAlertMessage(msg)
                                         msg = ""
                                         showForm = false
                                     }
@@ -146,14 +144,12 @@ var selectedIndex by remember { mutableIntStateOf(-1) }
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { selectedIndex = message.id }
+                                    .clickable { message.selectedMessage }
                             ) {
                                 Checkbox(
-                                    checked = selectedIndex == message.id,
+                                    checked = message.selectedMessage,
                                     onCheckedChange = {
-                                        selectedIndex = message.id
-                                        checkedId(message.id)
-                                        homeScreenViewModel.saveCustomMessage(message.id,true)
+                                        homeScreenViewModel.saveCustomMessage(message.id)
 
                                     }
                                 )
